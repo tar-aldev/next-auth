@@ -33,7 +33,9 @@ export function RegisterForm() {
   const [success, setSuccess] = useState("");
 
   const onSubmit = async (values: RegisterFormValues) => {
-    register(values);
+    const { error, success } = await register(values);
+    success && setSuccess(success);
+    error && setError(error);
   };
 
   return (
