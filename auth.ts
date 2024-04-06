@@ -1,8 +1,28 @@
-import NextAuth from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { db } from "@/lib/db";
-import { Adapter } from "next-auth/adapters";
 import { authConfig } from "@/auth.config";
+import { getUserById } from "@/data/user";
+import { db } from "@/lib/db";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { UserRole } from "@prisma/client";
+import NextAuth from "next-auth";
+import { Adapter } from "next-auth/adapters";
+import "next-auth/jwt";
+
+declare module "next-auth" {
+  /**
+   * The shape of the user object returned in the OAuth providers' `profile` callback,
+   * or the second parameter of the `session` callback, when using a database.
+   */
+  interface User {
+    role: UserRole;
+  }
+}
+
+declare module "next-auth/jwt" {
+  /** Returned by the `jwt` callback and `auth`, when using JWT sessions */
+  interface JWT {
+    role: UserRole;
+  }
+}
 
 export const {
   handlers: { GET, POST },
@@ -10,6 +30,63 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
+  pages: {
+    signIn: "/auth/login",
+    error: "/auth/error",
+  },
+  callbacks: {
+    // signIn: async ({ user }) => {
+    //   if (!user.id) {
+    //     return false;
+    //   }
+    //   const existingUser = await getUserById(user.id);
+
+    //   if (!existingUser || !existingUser.emailVerified) {
+    //     return false;
+    //   }
+
+    //   return true;
+    // },
+    jwt: async ({ token }) => {
+      if (!token.sub) {
+        return token;
+      }
+
+      const user = await getUserById(token.sub);
+      if (!user) return token;
+
+      token.role = user.role;
+
+      return token;
+    },
+    session: async ({ token, session }) => {
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+      }
+
+      if (token.role && session.user) {
+        session.user.role = token.role;
+      }
+
+      return session;
+    },
+  },
+  events: {
+    linkAccount: async ({ user }) => {
+      if (!user?.id) {
+        return;
+      }
+      await db.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          emailVerified: new Date(),
+        },
+      });
+      // populate email verified with true
+    },
+  },
   adapter: PrismaAdapter(db) as Adapter,
   session: { strategy: "jwt" },
   ...authConfig,

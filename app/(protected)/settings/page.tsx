@@ -6,7 +6,7 @@ export default async function Settings() {
 
   return (
     <div>
-      {JSON.stringify(session, null, 2)}
+      <pre>{JSON.stringify(session, null, 2)}</pre>
 
       <form
         action={async () => {
