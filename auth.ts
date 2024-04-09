@@ -35,18 +35,23 @@ export const {
     error: "/auth/error",
   },
   callbacks: {
-    // signIn: async ({ user }) => {
-    //   if (!user.id) {
-    //     return false;
-    //   }
-    //   const existingUser = await getUserById(user.id);
+    signIn: async ({ user, account }) => {
+      if (account?.provider !== "credentials") {
+        return true;
+      }
 
-    //   if (!existingUser || !existingUser.emailVerified) {
-    //     return false;
-    //   }
+      if (!user.id) {
+        return false;
+      }
 
-    //   return true;
-    // },
+      const existingUser = await getUserById(user.id);
+
+      if (!existingUser?.emailVerified) {
+        return false;
+      }
+
+      return true;
+    },
     jwt: async ({ token }) => {
       if (!token.sub) {
         return token;
