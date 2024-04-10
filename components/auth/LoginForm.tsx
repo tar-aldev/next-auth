@@ -54,21 +54,6 @@ export const LoginForm = () => {
     error && setError(error);
 
     setIsPending(false);
-
-    // .then((data) => {
-    //   if (data?.error) {
-    //     form.reset();
-    //     setError(data.error);
-    //   }
-    //   if (data?.success) {
-    //     form.reset();
-    //     setSuccess(data.success);
-    //   }
-    //   if (data?.twoFactor) {
-    //     setShowTwoFactor(true);
-    //   }
-    // })
-    // .catch(() => setError("Something went wrong"));
   };
 
   return (

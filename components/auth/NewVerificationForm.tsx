@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { BeatLoader } from "react-spinners";
-import { verifyToken } from "../../actions/newVerification";
+import { verifyToken } from "@/actions/newVerification";
 import { CardWrapper } from "./CardWrapper";
 import { FormError } from "../FormError";
 import { FormSuccess } from "../FormSuccess";
