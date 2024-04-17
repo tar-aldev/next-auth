@@ -23,3 +23,15 @@ export const sendResetPasswordEmail = (email: string, token: string) => {
     html: `<p>Click <a href="${confirmLink}">here</a> to confirm email.</p>`,
   });
 };
+
+export const sendTwoFactorAuthenticationEmail = (
+  email: string,
+  token: string
+) => {
+  return resend.emails.send({
+    from: "onboarding@resend.dev",
+    to: email,
+    subject: "2FA Code",
+    html: `<p>This is your 2FA code: ${token}</p>`,
+  });
+};

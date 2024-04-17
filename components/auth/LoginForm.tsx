@@ -49,11 +49,22 @@ export const LoginForm = () => {
     setSuccess("");
     setIsPending(true);
 
-    const { error, success } = await login(values);
-    success && setSuccess(success);
-    error && setError(error);
-
+    const { error, success, twoFactor } = await login(values);
     setIsPending(false);
+
+    if (error) {
+      form.reset();
+      setError(error);
+    }
+
+    if (success) {
+      form.reset();
+      setSuccess(success);
+    }
+
+    if (twoFactor) {
+      setShowTwoFactor(true);
+    }
   };
 
   return (
