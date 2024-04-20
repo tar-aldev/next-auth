@@ -7,7 +7,6 @@ import NextAuth from "next-auth";
 import { Adapter } from "next-auth/adapters";
 import "next-auth/jwt";
 import { getTwoFactorConfirmationByUserId } from "./data/twoFactorConfirmation";
-import { sendTwoFactorAuthenticationEmail } from "./lib/mail";
 
 declare module "next-auth" {
   /**
@@ -16,6 +15,7 @@ declare module "next-auth" {
    */
   interface User {
     role: UserRole;
+    isTwoFactorEnabled?: boolean;
   }
 }
 
@@ -23,6 +23,7 @@ declare module "next-auth/jwt" {
   /** Returned by the `jwt` callback and `auth`, when using JWT sessions */
   interface JWT {
     role: UserRole;
+    isTwoFactorEnabled?: boolean;
   }
 }
 
@@ -77,6 +78,7 @@ export const {
       if (!user) return token;
 
       token.role = user.role;
+      token.isTwoFactorEnabled = user.isTwoFactorEnabled;
 
       return token;
     },
@@ -87,6 +89,10 @@ export const {
 
       if (token.role && session.user) {
         session.user.role = token.role;
+      }
+
+      if (typeof token.isTwoFactorEnabled !== undefined && session.user) {
+        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
       }
 
       return session;
@@ -105,7 +111,6 @@ export const {
           emailVerified: new Date(),
         },
       });
-      // populate email verified with true
     },
   },
   adapter: PrismaAdapter(db) as Adapter,

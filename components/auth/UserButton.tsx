@@ -11,7 +11,6 @@ import {
 import { useCurrentUser } from "@/hook/useCurrentUser";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { ExitFullScreenIcon } from "@radix-ui/react-icons";
 import { FaUser, FaSignOutAlt } from "react-icons/fa";
 
 export const UserButton = () => {
