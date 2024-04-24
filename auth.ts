@@ -7,6 +7,7 @@ import NextAuth from "next-auth";
 import { Adapter } from "next-auth/adapters";
 import "next-auth/jwt";
 import { getTwoFactorConfirmationByUserId } from "./data/twoFactorConfirmation";
+import { getAccountByUserId } from "@/data/account";
 
 declare module "next-auth" {
   /**
@@ -16,6 +17,7 @@ declare module "next-auth" {
   interface User {
     role: UserRole;
     isTwoFactorEnabled?: boolean;
+    isOAuth?: boolean;
   }
 }
 
@@ -24,6 +26,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     role: UserRole;
     isTwoFactorEnabled?: boolean;
+    isOAuth?: boolean;
   }
 }
 
@@ -76,7 +79,11 @@ export const {
 
       const user = await getUserById(token.sub);
       if (!user) return token;
+      const existingAccount = await getAccountByUserId(user.id);
 
+      token.isOAuth = !!existingAccount;
+      token.name = user.name;
+      token.email = user.email;
       token.role = user.role;
       token.isTwoFactorEnabled = user.isTwoFactorEnabled;
 
@@ -95,6 +102,11 @@ export const {
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
       }
 
+      if (session.user) {
+        session.user.name = token.name;
+        session.user.email && (token.email = token.email);
+        session.user.isOAuth = token.isOAuth;
+      }
       return session;
     },
   },
